@@ -1,3 +1,3 @@
 import os;
 
-print("ENV", os.getenv('KOKOKO'))
+print("ENV VAR", os.getenv('KOKOKO'))
