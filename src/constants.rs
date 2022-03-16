@@ -14,6 +14,3 @@ const USER_AGENTS: [&str; 3] = [
 ];
 
 const DEFAULT_ACCESS_TOKEN_LIFETIME: u64 = 3600 * 4;
-
-//const MAX_POLLING_TRIES = 24;  # 24 * POLLING_WAIT_TIME = 2 minutes
-//POLLING_WAIT_TIME = 5  # Seconds
