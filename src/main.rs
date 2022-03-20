@@ -10,7 +10,6 @@ use serenity::{
 
 use serde_json::{Value, Map, to_vec};
 
-mod tgtg;
 mod constants;
 
 struct Handler;
