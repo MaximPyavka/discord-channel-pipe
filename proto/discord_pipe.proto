@@ -1,0 +1,13 @@
+syntax = "proto3";
+package discord_pipe;
+
+service DiscordPipe{
+    rpc PushMessage(MessageToChannel) returns (Empty) {}
+}
+
+message MessageToChannel {
+    int64 channel_id = 1;
+    string body = 2;
+}
+
+message Empty{}
