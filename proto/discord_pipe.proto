@@ -6,8 +6,8 @@ service DiscordPipe{
 }
 
 message MessageToChannel {
-    int64 channel_id = 1;
-    string body = 2;
+    uint64 channel_id = 1;
+    string content = 2;
 }
 
 message Empty{}

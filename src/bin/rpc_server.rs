@@ -1,23 +1,17 @@
-use std::collections::HashMap;
-use std::pin::Pin;
-use std::sync::Arc;
-use std::time::Instant;
-
 use tonic::transport::Server;
 use tonic::{Request, Response, Status};
 
-use discord_pipe_service::discord_pipe_server::{DiscordPipe, DiscordPipeServer};
-use discord_pipe_service::{Empty, MessageToChannel};
+use discord_pipe::prototypes::{DiscordPipeServer, DiscordPipe, MessageToChannel, Empty};
 
-pub mod discord_pipe_service {
-    tonic::include_proto!("discord_pipe");
-}
+use discord_pipe::discord_push_handler::channel_handle;
 
-use discord_channel_pusher::discord_push_handler::push_to_channel;
+use tokio::sync::mpsc::{channel, Sender};
 
 
 #[derive(Debug)]
-pub struct DiscordPipeService {}
+pub struct DiscordPipeService {
+    message_sender: Sender<MessageToChannel>
+}
 
 #[tonic::async_trait]
 impl DiscordPipe for DiscordPipeService {
@@ -25,13 +19,10 @@ impl DiscordPipe for DiscordPipeService {
         &self,
         request: Request<MessageToChannel>,
     ) -> Result<Response<Empty>, Status> {
-        // println!("GOT REQUEST {:#?}", request);
-
-        let request_message = request.into_inner();
-        println!("MESSAGE {:#?}", request_message);
-
-        let message = "KOKOKO".to_string();
-        push_to_channel(12345, message).await;
+        let sender = self.message_sender.clone();
+        tokio::spawn(async move {
+            let send_to_channel = sender.send(request.into_inner()).await;
+        });
 
 
         Ok(Response::new(Empty {}))
@@ -43,13 +34,14 @@ impl DiscordPipe for DiscordPipeService {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:10000".parse().unwrap();
 
-    println!("RouteGuideServer listening on: {}", addr);
-
-    let message_service = DiscordPipeService{};
+    let (tx, rx) = channel::<MessageToChannel>(10);
+    let message_service = DiscordPipeService{ message_sender: tx };
     let svc = DiscordPipeServer::new(message_service);
-    // let streeeem: ReceiverStream<_> = rx.into();
+    
+    let discord_ch_handle = channel_handle(rx);
+    let server_run = Server::builder().add_service(svc).serve(addr);
 
-    let grpc_server_launch = Server::builder().add_service(svc).serve(addr).await?;
+    let (_, _) = tokio::join!(server_run, discord_ch_handle);
 
     Ok(())
 }
