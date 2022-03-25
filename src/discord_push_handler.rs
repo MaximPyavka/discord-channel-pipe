@@ -50,7 +50,7 @@ struct Handler;
 
 
 pub async fn channel_handle(rx: Receiver<MessageToChannel>) {
-    let token = "fsdf".to_string();
+    let token = env::var("DISCORD_BOT_TOKEN").expect("Please specify env variable DISCORD_BOT_TOKEN");
     let http_client = &Http::new_with_token(&token);
 
     let streeeem: ReceiverStream<_> = rx.into();
