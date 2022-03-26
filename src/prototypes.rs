@@ -4,5 +4,5 @@ pub mod discord_pipe_service {
 
 pub use discord_pipe_service::discord_pipe_server::{DiscordPipe, DiscordPipeServer};
 pub use discord_pipe_service::discord_pipe_client::DiscordPipeClient;
-pub use discord_pipe_service::{Empty, MessageToChannel};
+pub use discord_pipe_service::{DiscordPushResult, MessageToChannel};
 

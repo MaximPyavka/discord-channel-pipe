@@ -2,7 +2,7 @@ syntax = "proto3";
 package discord_pipe;
 
 service DiscordPipe{
-    rpc PushMessage(MessageToChannel) returns (Empty) {}
+    rpc PushMessage(MessageToChannel) returns (DiscordPushResult) {}
 }
 
 message MessageToChannel {
@@ -10,4 +10,6 @@ message MessageToChannel {
     string content = 2;
 }
 
-message Empty{}
+message DiscordPushResult{
+    optional string error_message = 1;
+}

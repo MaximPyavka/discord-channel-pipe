@@ -1,18 +1,16 @@
 use tonic::transport::Server;
 use tonic::{Request, Response, Status};
 
-use std::net::{SocketAddr, Ipv4Addr, IpAddr};
+use discord_pipe::prototypes::{
+    DiscordPipe, DiscordPipeServer, DiscordPushResult, MessageToChannel,
+};
 
-use discord_pipe::prototypes::{DiscordPipe, DiscordPipeServer, Empty, MessageToChannel};
-
-use discord_pipe::discord_push_handler::channel_handle;
-use discord_pipe::utils::get_service_socket;
-
-use tokio::sync::mpsc::{channel, Sender};
+use discord_pipe::discord_push_handler::DiscordBot;
+use discord_pipe::utils::{get_discord_bot_token, get_service_socket};
 
 #[derive(Debug)]
 pub struct DiscordPipeService {
-    message_sender: Sender<MessageToChannel>,
+    discord_bot: DiscordBot,
 }
 
 #[tonic::async_trait]
@@ -20,13 +18,15 @@ impl DiscordPipe for DiscordPipeService {
     async fn push_message(
         &self,
         request: Request<MessageToChannel>,
-    ) -> Result<Response<Empty>, Status> {
-        let sender = self.message_sender.clone();
-        tokio::spawn(async move {
-            let send_to_channel = sender.send(request.into_inner()).await;
-        });
+    ) -> Result<Response<DiscordPushResult>, Status> {
+        let error_message = match self.discord_bot.push_to_channel(request.into_inner()).await {
+            Err(e) => { Some(e.to_string()) },
+            _ => {None}
+        };
 
-        Ok(Response::new(Empty {}))
+        Ok(Response::new(DiscordPushResult {
+            error_message
+        }))
     }
 }
 
@@ -34,14 +34,12 @@ impl DiscordPipe for DiscordPipeService {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = get_service_socket();
 
-    let (tx, rx) = channel::<MessageToChannel>(10);
-    let message_service = DiscordPipeService { message_sender: tx };
+    let discord_bot = DiscordBot::new(get_discord_bot_token());
+    let message_service = DiscordPipeService { discord_bot };
     let svc = DiscordPipeServer::new(message_service);
 
-    let discord_ch_handle = channel_handle(rx);
-    let server_run = Server::builder().add_service(svc).serve(addr);
-
-    let (_, _) = tokio::join!(server_run, discord_ch_handle);
+    let server_exec_result = Server::builder().add_service(svc).serve(addr).await;
+    println!("RPC server has been stopped: {:?}", server_exec_result);
 
     Ok(())
 }

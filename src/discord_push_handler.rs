@@ -1,78 +1,35 @@
-use std::{env, str::FromStr};
-use std::sync::Arc;
-
-use tokio::sync::mpsc::Receiver;
-
-use futures::StreamExt;
-
-use serenity::{
-    model::{channel::Message, gateway::Ready},
-    model::id::ChannelId,
-    http::Http,
-    prelude::*,
-};
-
-use tokio_stream::wrappers::ReceiverStream;
-
-use serde_json::{Value, Map, to_vec};
+use serenity::{http::Http, http::HttpError, model::id::ChannelId, Error};
 
 use crate::prototypes::MessageToChannel;
 
-struct Handler;
+#[derive(Debug)]
+pub struct DiscordBot {
+    http_client: Http,
+}
 
-// pub async fn push_to_channel(channel_id: u64, message: String) {
-//     let token = "discord-bot-token".to_string();
+impl DiscordBot {
+    pub fn new(token: String) -> Self {
+        DiscordBot {
+            http_client: Http::new_with_token(&token),
+        }
+    }
 
-//     let mut client =
-//         Client::builder(&token).await.expect("Err creating client");
-
-//     let http_client = Http::new_with_token(&token);
-
-//     let channel = ChannelId(channel_id);
-
-//     let resp = channel.send_message(&http_client, |m| {
-//         m.content("test");
-
-//         m.embed(|mut e| {
-//             e.title("This is an embed");
-//             e.description("With a description");
-
-//             e
-//         });
-
-//         m
-//     }).await;
-
-//     if let Err(reason) = resp {
-//             println!("ERROR WHY {:?}", reason);
-//         }
-// }
-
-
-pub async fn channel_handle(rx: Receiver<MessageToChannel>) {
-    let token = env::var("DISCORD_BOT_TOKEN").expect("Please specify env variable DISCORD_BOT_TOKEN");
-    let http_client = &Http::new_with_token(&token);
-
-    let streeeem: ReceiverStream<_> = rx.into();
-
-    // println!("BEFORE CALL");
-
-    streeeem.for_each_concurrent(3, |message| async move {
-        // println!("CHANNEL {:?}", message.channel_id);
-        let channel = ChannelId(message.channel_id);
-        // println!("IN CALL");
-        let res = channel.send_message(http_client, |m| {
-            m.content(message.content);
-            m.embed(|mut e| {
-                e.title("This is an embed");
-                e.description("With a description");
-    
-                e
-            });
-    
-            m
-        }).await;
-        println!("RESPONSE {:?}", res);
-
-    }).await;
+    pub async fn push_to_channel(&self, message: MessageToChannel) -> Result<(), HttpError> {
+        match ChannelId::from(message.channel_id)
+            .send_message(&self.http_client, |m| {
+                m.content(message.content);
+                m
+            })
+            .await
+        {
+            Err(e) => match e {
+                Error::Http(http_error) => {
+                    eprintln!("Http error here {:?}", http_error);
+                    Err(*http_error)
+                }
+                _ => Ok(()),
+            },
+            _ => Ok(()),
+        }
+    }
 }
