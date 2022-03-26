@@ -1,13 +1,8 @@
 use std::error::Error;
-use std::time::Duration;
-use tokio::time;
 use tonic::transport::Channel;
 use tonic::Request;
 
-use std::fs;
-use std::path::{PathBuf, Path};
-
-use discord_pipe::prototypes::{MessageToChannel, Empty, DiscordPipeClient};
+use discord_pipe::prototypes::{MessageToChannel, DiscordPipeClient};
 use discord_pipe::utils::{get_client_endpoint, get_channel_id};
 
 
@@ -17,9 +12,9 @@ async fn test_call(client: &mut DiscordPipeClient<Channel>) -> Result<(), Box<dy
     
     let response = client
         .push_message(Request::new(message))
-        .await?;
+        .await;
 
-    println!("REPONSE {:#?}", response);
+    println!("RESPONSE {:?}", response);
 
     Ok(())
 }
