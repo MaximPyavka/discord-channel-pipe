@@ -2,6 +2,8 @@ use serenity::{http::Http, http::HttpError, model::id::ChannelId, Error};
 
 use crate::prototypes::MessageToChannel;
 
+use log::error;
+
 #[derive(Debug)]
 pub struct DiscordBot {
     http_client: Http,
@@ -22,13 +24,16 @@ impl DiscordBot {
             })
             .await
         {
-            Err(e) => match e {
-                Error::Http(http_error) => {
-                    eprintln!("Http error here {:?}", http_error);
-                    Err(*http_error)
+            Err(e) => {
+                error!(
+                    "Error from discord trying to send message: {:#?}",
+                    e.to_string()
+                );
+                match e {
+                    Error::Http(http_error) => Err(*http_error),
+                    _ => Ok(()),
                 }
-                _ => Ok(()),
-            },
+            }
             _ => Ok(()),
         }
     }
