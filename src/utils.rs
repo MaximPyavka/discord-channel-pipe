@@ -29,3 +29,37 @@ pub fn get_channel_id() -> u64 {
 pub fn get_discord_bot_token() -> String {
     env::var("DISCORD_BOT_TOKEN").expect("Please specify env variable DISCORD_BOT_TOKEN")
 }
+
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    #[should_panic]
+    fn test_service_port_not_set() {
+        // super::env::set_var()
+        super::get_service_port();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_service_port_is_string() {
+        super::env::set_var("PIPE_PORT", "AAAAA");
+        super::get_service_port();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_service_port_is_not_u16() {
+        super::env::set_var("PIPE_PORT", "65537");
+        super::get_service_port();
+    }
+
+    #[test]
+    fn test_service_port_is_ok() {
+        super::env::set_var("PIPE_PORT", "65535");
+        let port = super::get_service_port();
+        assert_eq!(port, 65535)
+    }
+
+}
