@@ -3,8 +3,6 @@ use log::info;
 
 use discord_pipe::prototypes::DiscordPipeServer;
 
-use env_logger;
-
 use discord_pipe::discord_push_handler::DiscordBot;
 use discord_pipe::utils::{get_discord_bot_token, get_service_socket};
 use discord_pipe::service::DiscordPipeService;
