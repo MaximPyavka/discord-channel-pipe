@@ -1,2 +1,2 @@
-# discord-tgtg-bot
-Discord Bot that sends notifications to the channel about new TGTG bags to pick up.
+# discord-channel-pipe
+Simple grpc service that forwards incoming messages to appropriate discord channel. 
