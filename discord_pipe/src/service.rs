@@ -1,6 +1,6 @@
 use tonic::{Request, Response, Status};
 
-use crate::prototypes::{DiscordPushResult, MessageToChannel, DiscordPipe};
+use message_rpc::prototypes::{DiscordPushResult, MessageToChannel, DiscordPipe};
 use crate::discord_push_handler::DiscordPusher;
 
 #[derive(Debug)]

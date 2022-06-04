@@ -1,10 +1,10 @@
 use tonic::transport::Server;
 use log::info;
 
-use discord_pipe::prototypes::DiscordPipeServer;
+use message_rpc::prototypes::DiscordPipeServer;
 
 use discord_pipe::discord_push_handler::DiscordBot;
-use discord_pipe::utils::{get_discord_bot_token, get_service_socket};
+use message_rpc::utils::{get_discord_bot_token, get_service_socket};
 use discord_pipe::service::DiscordPipeService;
 
 #[tokio::main]

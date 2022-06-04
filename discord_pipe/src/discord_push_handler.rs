@@ -1,6 +1,6 @@
 use serenity::{http::Http, http::HttpError, model::id::ChannelId, Error};
 
-use crate::prototypes::MessageToChannel;
+use message_rpc::prototypes::MessageToChannel;
 
 use log::error;
 

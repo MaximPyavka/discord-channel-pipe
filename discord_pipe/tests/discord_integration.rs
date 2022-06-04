@@ -1,5 +1,5 @@
 use discord_pipe::discord_push_handler::DiscordPusher;
-use discord_pipe::prototypes::{
+use message_rpc::prototypes::{
     DiscordPipeClient, DiscordPipeServer, DiscordPushResult, MessageToChannel,
 };
 use discord_pipe::service::DiscordPipeService;
